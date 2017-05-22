@@ -82,6 +82,23 @@ class ReceiverGetRequest(base.SenlinObject):
 
 
 @base.SenlinObjectRegistry.register
+class ReceiverUpdateRequesBodyt(base.SenlinObject):
+
+    fields = {
+        'name': fields.NameField(nullable=True),
+        'params': fields.JsonField(nullable=True, default={})
+    }
+
+
+@base.SenlinObjectRegistry.register
+class ReceiverUpdateRequest(base.SenlinObject):
+
+    fields = {
+        'identity': fields.StringField(),
+    }
+
+
+@base.SenlinObjectRegistry.register
 class ReceiverDeleteRequest(base.SenlinObject):
 
     fields = {

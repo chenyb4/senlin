@@ -2356,6 +2356,37 @@ class EngineService(service.Service):
         return receiver.to_dict()
 
     @request_context
+    def receiver_update(self, ctx, req):
+        """Update the properties of a given receiver
+
+        :param ctx: An instance of request context.
+        :param req: An instance of the ReceiverUpdateRequest.
+        :returns: A dictionary containing the receiver details of the updated
+                  receiver, or an exception `ResourceNotFound` if no matching
+                  receiver is found.
+        """
+        LOG.info("Updating receiver '%(id)s'.", {'id': req.identity})
+        db_receiver = receiver_obj.Policy.find(ctx, req.identity)
+        receiver = receiver_mod.Receiver.load(ctx, receiver=db_receiver)
+        changed = False
+        if (req.receiver.name is not None and
+                req.receiver.name != receiver.name):
+            receiver.name = req.receiver.name
+            changed = True
+        if (req.receiver.params is not None and
+                req.receiver.params != receiver.params):
+            receiver.params = req.receiver.params
+            changed = True
+        if changed:
+            receiver_mod.Receiver.store(ctx)
+        else:
+            msg = _("No property needs an update.")
+            raise exception.BadRequest(msg=msg)
+
+        LOG.info("Receiver '%(id)s' is updated.", {'id': req.identity})
+        return receiver.to_dict()
+
+    @request_context
     def receiver_delete(self, ctx, req):
         """Delete the specified receiver.
 
