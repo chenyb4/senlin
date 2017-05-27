@@ -20,7 +20,6 @@ from senlin.api.common import util
 from senlin.api.common import wsgi
 from senlin.common import consts
 from senlin.common.i18n import _
-from senlin.objects import base as obj_base
 
 
 class ReceiverController(wsgi.Controller):
