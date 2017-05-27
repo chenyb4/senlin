@@ -20,6 +20,7 @@ from senlin.api.common import util
 from senlin.api.common import wsgi
 from senlin.common import consts
 from senlin.common.i18n import _
+from senlin.objects import base as obj_base
 
 
 class ReceiverController(wsgi.Controller):
@@ -71,6 +72,21 @@ class ReceiverController(wsgi.Controller):
         obj = util.parse_request(
             'ReceiverGetRequest', req, {'identity': receiver_id})
         receiver = self.rpc_client.call(req.context, 'receiver_get', obj)
+        return {'receiver': receiver}
+
+    @util.policy_enforce
+    def update(self, req, receiver_id, body):
+        receiver_data = body.get('receiver', None)
+        if receiver_data is None:
+            raise exc.HTTPBadRequest(_("Malformed request data, missing "
+                                       "'receiver' key in request body."))
+
+        params = receiver_data
+        params['identity'] = receiver_id
+        obj = util.parse_request('ReceiverUpdateRequest', req,
+                                 params)
+        receiver = self.rpc_client.call(req.context, 'receiver_update', obj)
+
         return {'receiver': receiver}
 
     @util.policy_enforce
