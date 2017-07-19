@@ -1247,3 +1247,27 @@ class ServerProfile(base.Profile):
 
         self.compute(obj).server_change_password(obj.physical_id, password)
         return True
+
+    def handle_snapshot(self, obj, **options):
+        """Handler for the snapshot operation."""
+        if not obj.physical_id:
+            return False
+        image_id = self.block_storage(obj).snapshot_create(obj.physical_id,
+                                                           obj.name)
+        return image_id
+
+    def check_snapshot_complete(self, obj, image_id):
+        """Check for image snapshot complete operation"""
+        image = self.block_storage(obj).snapshot_get(image_id)
+        if image.status == 'ACTIVE':
+            return True
+        elif image.status == 'ERROR':
+            return False
+
+    def handle_delete_snapshot(self, obj, image_id):
+        """Handler for the snapshot delete operation."""
+        try:
+            self.block_storage(obj).snapshot_delete(image_id)
+        except exc.InternalError as ex:
+            raise exc.EResourceDeletion(type='server', id=image_id,
+                                        message=six.text_type(ex))
